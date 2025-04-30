@@ -1,0 +1,64 @@
+[project]
+name = "amature_fs"
+version = "0.0.1"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+
+dependencies = [
+    "fsspec>=2025.2.0",
+    "pydantic>=2.10.6",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.4",
+]
+server = [
+    "fastapi>=0.115.8",
+    "sqlmodel>=0.0.22",
+    "uvicorn>=0.34.0",
+]
+
+
+# [build-system]
+# requires = ["setuptools>=64", "setuptools_scm>=8"]
+# build-backend = "setuptools.build_meta"
+
+# [project.entry-points."fsspec.specs"]
+# vault = "rctl2.VaultFileSystem"
+# env = "rctl2.EnvFileSystem"
+# array = "rctl2.ArrayFileSystem"
+
+# [tool.setuptools_scm]
+
+# [tool.setuptools]
+# packages = { find = { include = ["rctl2*"] } }
+
+# [project.scripts]
+# rctl = "rctl.__main__:main"
+
+
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88          # blackと合わせる
+lint.select = [
+    "I",     # isort
+    "E",     # pycodestyle
+    "F",     # pyflakes
+    "YTT",   # 3.9未満互換コードを3.9の推奨構文に合わせる
+    "UP007"  # X | Y style annotation
+]
+lint.ignore = [
+    "F401",   # unused import
+    "E501",   # line-length balck で自動修正される
+    "F841",   # unused variable
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"  # "google" | "numpy" | "pep257"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
