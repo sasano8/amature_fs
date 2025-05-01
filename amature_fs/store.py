@@ -11,7 +11,7 @@ from .models import (
     MetaData,
     blueprint,
 )
-
+from .utils import uuid7
 
 import fsspec
 import json
@@ -263,6 +263,7 @@ class StoreBluePrint:
                     cumulative_hashes.append(algorithm + ":" + hash)
                     block_hashes.append(algorithm + ":" + hash)
 
+            meta["system"]["id"] = uuid7()
             meta["system"]["size"] = size
             meta["system"]["hash"] = cumulative_hashes[-1]
             meta["system"]["chunks"] = {

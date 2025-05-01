@@ -8,6 +8,7 @@ requires-python = ">=3.12"
 dependencies = [
     "fsspec>=2025.2.0",
     "pydantic>=2.10.6",
+    "uuid-utils>=0.10.0",
 ]
 
 [dependency-groups]
