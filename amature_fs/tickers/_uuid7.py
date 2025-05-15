@@ -16,8 +16,8 @@ def from_datetime(dt: datetime):
 
 def from_timestamp(timestamp: float):
     ts = int(timestamp)
-    # 浮動小数点の誤差を避けて、正しいマイクロ秒を得る
-    microsecond = round((timestamp - ts) * 1_000_000)
+    # 小数点以下の秒をマイクロ秒単位で切り捨て
+    microsecond = int((timestamp - ts) * 1_000_000)
     nanos = microsecond * 1000
     return uuid7(ts, nanos)
 

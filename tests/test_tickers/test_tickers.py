@@ -5,38 +5,38 @@ import pytest
 from uuid_utils import uuid7
 
 
-def test_normalize_to_millisecond():
-    dt = tickers._datetime.normalize_to_millisecond(
+def test_floor_to_millisecond():
+    dt = tickers._datetime.floor_to_millisecond(
         datetime(2025, 5, 14, 0, 0, 0, 123_499)
     )
     assert dt.second == 0
     assert dt.microsecond == 123_000
     # 四捨五入
-    dt = tickers._datetime.normalize_to_millisecond(
+    dt = tickers._datetime.floor_to_millisecond(
         datetime(2025, 5, 14, 0, 0, 0, 123_500)
     )
     assert dt.second == 0
-    assert dt.microsecond == 124_000
+    assert dt.microsecond == 123_000
     # 桁あふれ繰り上げ
-    dt = tickers._datetime.normalize_to_millisecond(
+    dt = tickers._datetime.floor_to_millisecond(
         datetime(2025, 5, 14, 0, 0, 0, 999_750)
     )
-    assert dt.second == 1
-    assert dt.microsecond == 0
+    assert dt.second == 0
+    assert dt.microsecond == 999000
 
 
-def test_now_rounded_to_millisecond(n=100):
+def test_now_floor_to_millisecond(n=100):
     """ミリ秒精度の現在日が得られているか確認する。
     N 回試行し、一定のヒット率が得られていればよしとする。
     """
-    now = tickers._datetime.now_rounded_to_millisecond()
-    normalized_now = tickers._datetime.normalize_to_millisecond(now)
+    now = tickers._datetime.now_floor_to_millisecond()
+    normalized_now = tickers._datetime.floor_to_millisecond(now)
 
     assert now == normalized_now
     assert now.tzinfo == timezone.utc
 
-    now = tickers._datetime.now_rounded_to_millisecond(tz.gettz("Asia/Tokyo"))
-    normalized_now = tickers._datetime.normalize_to_millisecond(now)
+    now = tickers._datetime.now_floor_to_millisecond(tz.gettz("Asia/Tokyo"))
+    normalized_now = tickers._datetime.floor_to_millisecond(now)
 
     assert now == normalized_now
     assert now.tzinfo == tz.gettz("Asia/Tokyo")
@@ -44,8 +44,8 @@ def test_now_rounded_to_millisecond(n=100):
     results = []
     for i in range(n):
         dt = datetime.now(tz=timezone.utc)
-        now = tickers._datetime.now_rounded_to_millisecond()
-        normalized_now = tickers._datetime.normalize_to_millisecond(dt)
+        now = tickers._datetime.now_floor_to_millisecond()
+        normalized_now = tickers._datetime.floor_to_millisecond(dt)
         results.append(normalized_now == now)
 
     hit_rate = sum(results) / len(results)
@@ -62,7 +62,7 @@ def test_to_uuid7_seed():
 def test_uuid7(n=100):
     """uuid7に関する挙動に一貫性があるか確認する"""
     for i in range(n):
-        now = tickers._datetime.now_rounded_to_millisecond()
+        now = tickers._datetime.now_floor_to_millisecond()
         # now = datetime(2025, 5, 14, 21, 13, 44, 234000, tzinfo=timezone.utc)  # 以前問題が起きた日時
 
         u1 = tickers._uuid7.from_datetime(now)
@@ -97,7 +97,7 @@ def test_uuid7(n=100):
             assert dt1 == dt6
 
         assert dt1 == now
-        assert dt1 == tickers._datetime.normalize_to_millisecond(now)
+        assert dt1 == tickers._datetime.floor_to_millisecond(now)
 
 
 def test_timestamp_ticker_to_datetime():
