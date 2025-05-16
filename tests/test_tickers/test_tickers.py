@@ -6,23 +6,32 @@ from uuid_utils import uuid7
 
 
 def test_floor_to_millisecond():
-    dt = tickers._datetime.floor_to_millisecond(
-        datetime(2025, 5, 14, 0, 0, 0, 123_499)
-    )
-    assert dt.second == 0
-    assert dt.microsecond == 123_000
-    # 四捨五入
-    dt = tickers._datetime.floor_to_millisecond(
-        datetime(2025, 5, 14, 0, 0, 0, 123_500)
-    )
-    assert dt.second == 0
-    assert dt.microsecond == 123_000
-    # 桁あふれ繰り上げ
-    dt = tickers._datetime.floor_to_millisecond(
-        datetime(2025, 5, 14, 0, 0, 0, 999_750)
-    )
-    assert dt.second == 0
-    assert dt.microsecond == 999000
+    dt = tickers._datetime.floor_to_millisecond(datetime(2025, 5, 14, 0, 0, 0, 0))
+    assert dt.isoformat() == "2025-05-14T00:00:00"
+
+    dt = tickers._datetime.floor_to_millisecond(datetime(2025, 5, 14, 0, 0, 0, 123_499))
+    assert dt.isoformat() == "2025-05-14T00:00:00.123000"
+
+    dt = tickers._datetime.floor_to_millisecond(datetime(2025, 5, 14, 0, 0, 0, 123_500))
+    assert dt.isoformat() == "2025-05-14T00:00:00.123000"
+
+    dt = tickers._datetime.floor_to_millisecond(datetime(2025, 5, 14, 0, 0, 0, 123_900))
+    assert dt.isoformat() == "2025-05-14T00:00:00.123000"
+
+    dt = tickers._datetime.floor_to_millisecond(datetime(2025, 5, 14, 0, 0, 0, 123_990))
+    assert dt.isoformat() == "2025-05-14T00:00:00.123000"
+
+    dt = tickers._datetime.floor_to_millisecond(datetime(2025, 5, 14, 0, 0, 0, 123_994))
+    assert dt.isoformat() == "2025-05-14T00:00:00.123000"
+
+    dt = tickers._datetime.floor_to_millisecond(datetime(2025, 5, 14, 0, 0, 0, 123_995))
+    assert dt.isoformat() == "2025-05-14T00:00:00.124000"
+
+    dt = tickers._datetime.floor_to_millisecond(datetime(2025, 5, 14, 0, 0, 0, 123_999))
+    assert dt.isoformat() == "2025-05-14T00:00:00.124000"
+
+    dt = tickers._datetime.floor_to_millisecond(datetime(2025, 5, 14, 0, 0, 0, 999_999))
+    assert dt.isoformat() == "2025-05-14T00:00:01"
 
 
 def test_now_floor_to_millisecond(n=100):
@@ -53,21 +62,36 @@ def test_now_floor_to_millisecond(n=100):
 
 
 def test_to_uuid7_seed():
-    dt = datetime(2000, 1, 1, tzinfo=timezone.utc)
-    ts, nanos = tickers._datetime.to_uuid7_seed(dt)
-    assert ts == int(dt.timestamp())  # ミリ秒（小数）を除いた秒精度が返っていること
-    assert nanos == dt.microsecond * 1000  # ナノ秒精度の整数が返っていること
+    timstamp = 1.123456789
+    dt = datetime.fromtimestamp(timstamp, tz=timezone.utc)
+    ts, nanos = tickers._timestamp.to_uuid7_seed(dt.timestamp())
+    assert ts == 1
+    assert nanos == 123000000
+
+    dt = datetime(2025, 5, 15, 18, 9, 18, 664000, tzinfo=timezone.utc)
+    ts, nanos = tickers._timestamp.to_uuid7_seed(dt.timestamp())
+    assert ts == 1747332558
+    assert nanos == 664000000
+
+    dt = datetime(2025, 5, 15, 18, 9, 18, 664123, tzinfo=timezone.utc)
+    ts, nanos = tickers._timestamp.to_uuid7_seed(dt.timestamp())
+    assert ts == 1747332558
+    assert nanos == 664000000
+
+    dt = datetime(2025, 5, 15, 18, 9, 18, 665000, tzinfo=timezone.utc)
+    ts, nanos = tickers._timestamp.to_uuid7_seed(dt.timestamp())
+    assert ts == 1747332558
+    assert nanos == 665000000
 
 
 def test_uuid7(n=100):
     """uuid7に関する挙動に一貫性があるか確認する"""
     for i in range(n):
         now = tickers._datetime.now_floor_to_millisecond()
-        # now = datetime(2025, 5, 14, 21, 13, 44, 234000, tzinfo=timezone.utc)  # 以前問題が起きた日時
-
         u1 = tickers._uuid7.from_datetime(now)
         u2 = tickers._uuid7.from_timestamp(now.timestamp())
-        u3 = uuid7(*tickers._datetime.to_uuid7_seed(now))
+        ts, nanos = tickers._timestamp.to_uuid7_seed(now.timestamp())
+        u3 = uuid7(ts, nanos)
 
         dt1 = tickers._uuid7.to_datetime(u1)
         dt2 = tickers._uuid7.to_datetime(u2)

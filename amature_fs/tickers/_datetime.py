@@ -1,17 +1,13 @@
 from datetime import datetime, timezone
+from math import floor
+from ._timestamp import floor_to_millisecond as _timestamp_to_floor_to_millisecond
 
 
-def now_rounded_to_millisecond(tz=timezone.utc):
+def now_floor_to_millisecond(tz=timezone.utc):
     dt = datetime.now(tz)
-    return normalize_to_millisecond(dt)
+    return floor_to_millisecond(dt)
 
 
-def to_uuid7_seed(dt: datetime):
-    ts = int(dt.timestamp())
-    nanos = dt.microsecond * 1000
-    return ts, nanos
-
-
-def normalize_to_millisecond(dt: datetime):
-    microsecond = (dt.microsecond // 1000) * 1000
-    return dt.replace(microsecond=microsecond)
+def floor_to_millisecond(dt: datetime):
+    timestamp = _timestamp_to_floor_to_millisecond(dt.timestamp())
+    return datetime.fromtimestamp(timestamp, tz=dt.tzinfo)
