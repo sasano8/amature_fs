@@ -1,12 +1,12 @@
 from uuid import UUID
 from datetime import datetime, timezone
 from uuid_utils import uuid7
-from ._datetime import now_floor_to_millisecond
+from ._datetime import from_now_millisecond
 from ._timestamp import to_uuid7_seed, floor_to_millisecond
 
 
 def from_now(tz=timezone.utc):
-    dt = now_floor_to_millisecond(tz)
+    dt = from_now_millisecond(tz)
     return from_datetime(dt)
 
 

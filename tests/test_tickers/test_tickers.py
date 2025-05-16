@@ -38,13 +38,14 @@ def test_now_floor_to_millisecond(n=100):
     """ミリ秒精度の現在日が得られているか確認する。
     N 回試行し、一定のヒット率が得られていればよしとする。
     """
-    now = tickers._datetime.now_floor_to_millisecond()
+    now = tickers._datetime.from_now_millisecond()
+    assert isinstance(now, datetime)
     normalized_now = tickers._datetime.floor_to_millisecond(now)
 
     assert now == normalized_now
     assert now.tzinfo == timezone.utc
 
-    now = tickers._datetime.now_floor_to_millisecond(tz.gettz("Asia/Tokyo"))
+    now = tickers._datetime.from_now_millisecond(tz.gettz("Asia/Tokyo"))
     normalized_now = tickers._datetime.floor_to_millisecond(now)
 
     assert now == normalized_now
@@ -53,7 +54,7 @@ def test_now_floor_to_millisecond(n=100):
     results = []
     for i in range(n):
         dt = datetime.now(tz=timezone.utc)
-        now = tickers._datetime.now_floor_to_millisecond()
+        now = tickers._datetime.from_now_millisecond()
         normalized_now = tickers._datetime.floor_to_millisecond(dt)
         results.append(normalized_now == now)
 
@@ -87,7 +88,7 @@ def test_to_uuid7_seed():
 def test_uuid7(n=100):
     """uuid7に関する挙動に一貫性があるか確認する"""
     for i in range(n):
-        now = tickers._datetime.now_floor_to_millisecond()
+        now = tickers._datetime.from_now_millisecond()
         u1 = tickers._uuid7.from_datetime(now)
         u2 = tickers._uuid7.from_timestamp(now.timestamp())
         ts, nanos = tickers._timestamp.to_uuid7_seed(now.timestamp())
